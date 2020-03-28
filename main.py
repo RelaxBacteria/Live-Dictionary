@@ -5,55 +5,54 @@ import cv2
 pytesseract.pytesseract.tesseract_cmd = r'D:\_Code\_Tesseract\tesseract'
 
 # Grayscale attempt
-def test(lang, file):
+def ocrUnit(lang, file):
+    result = ""
+
+    # Converting image to grayscale for better recognition and saving the file to use ImageEnhance
     print("--------------GRAYSCALE--------------")
     img = Image.open(file).convert('L')
-    img_numpy = numpy.array(img, 'uint8')
-    cv2.imwrite('testbw.jpg', img_numpy)
-    print(pytesseract.image_to_string('testbw.jpg', lang=lang))
+    img_bw = numpy.array(img, 'uint8')
+    cv2.imwrite('testbw.jpg', img_bw)
+    result += " " + pytesseract.image_to_string(img_bw, lang=lang).replace("\n", " ")
+    print(pytesseract.image_to_string(img_bw, lang=lang))
     
-
-    # Grayscale + saturation
-    print("-------GRAYSCALE+SATURATION(3)-------")
-    imgbw = Image.open('testbw.jpg')
-    contrastbw = ImageEnhance.Contrast(imgbw)
-    imgcontrast = contrastbw.enhance(3)
-    imgcontrast.save('testbwcont3.jpg')
-    print(pytesseract.image_to_string('testbwcont3.jpg', lang=lang))
-    
-
-    print("-------GRAYSCALE+SATURATION(5)-------")
-    imgbw = Image.open('testbw.jpg')
-    contrastbw = ImageEnhance.Contrast(imgbw)
-    imgcontrast = contrastbw.enhance(5)
-    imgcontrast.save('testbwcont5.jpg')
-    print(pytesseract.image_to_string('testbwcont5.jpg', lang=lang))
-
+    print("-------GRAYSCALE+CONTRAST(5)-------")
+    contrastbw = ImageEnhance.Contrast(Image.open('testbw.jpg'))
+    img_bw_cont_5 = contrastbw.enhance(5)
+    img_bw_cont_5.save('testbwcont5.jpg')
+    result += " " + pytesseract.image_to_string(img_bw_cont_5, lang=lang).replace("\n", " ")
+    print(pytesseract.image_to_string(img_bw_cont_5, lang=lang))
 
     # Inverted Grayscale
     print("-------INVERTED GRAYSCALE------------")
     imgbw = Image.open('testbw.jpg')
-    imginvert = ImageOps.invert(imgbw)
-    imginvert.save('testbwinvert.jpg')
-    print(pytesseract.image_to_string('testbwinvert.jpg', lang=lang))
+    img_bw_invert = ImageOps.invert(Image.open('testbw.jpg'))
+    result += " " + pytesseract.image_to_string(img_bw_invert, lang=lang).replace("\n", " ")
+    print(pytesseract.image_to_string(img_bw_invert, lang=lang))
     
+    print("--INVERTED GRAYSCALE+CONTRAST(5)---")
+    img_bw_cont_5_invert = ImageOps.invert(Image.open('testbwcont5.jpg'))
+    result += " " + pytesseract.image_to_string(img_bw_cont_5_invert, lang=lang).replace("\n", " ")
+    print(pytesseract.image_to_string(img_bw_cont_5_invert, lang=lang))
 
-    # Inverted grayscale with saturation
-    print("--INVERTED GRAYSCALE+SATURATION(3)---")
-    imgbw = Image.open('testbwcont3.jpg')
-    imginvert = ImageOps.invert(imgbw)
-    imginvert.save('testbwcontinvert3.jpg')
-    print(pytesseract.image_to_string('testbwcontinvert3.jpg', lang=lang))
-    
+    words_list = result.split(" ")
+    filter_object = filter(lambda x: x != "", words_list)
+    words_list_no_empty = list(filter_object)
 
-    print("--INVERTED GRAYSCALE+SATURATION(5)---")
-    imgbw = Image.open('testbwcont5.jpg')
-    imginvert = ImageOps.invert(imgbw)
-    imginvert.save('testbwcontinvert5.jpg')
-    print(pytesseract.image_to_string('testbwcontinvert5.jpg', lang=lang))
+    # list containing results that more than two conversions agree
+    final_list = []
+    for word in words_list_no_empty:
+        if words_list_no_empty.count(word) >= 2:
+            final_list.append(word.strip(" "))
+    final_set = set(final_list)
+    print(final_set)
+
+
+
+    # words_set = set(words_list_no_empty)
+    # print(words_set)
     
-    
-test('rus', 'test.jpeg')
+ocrUnit('rus', 'test_rus.jpeg')
 
 # img = Image.open('test.jpg').convert('L')
 # img = Image.open('testbw.jpg')
