@@ -1,6 +1,15 @@
 import cv2
 import numpy as np
 
+def createPreview(image_name, target_name):
+    # Load screenshot.png
+    image = cv2.imread(image_name)
+
+    # Shrink it and create preview.png
+    preview_image = cv2.resize(image, dsize=(640, 480), fx=0.3, fy=0.7, interpolation=cv2.INTER_LINEAR)
+    
+    cv2.imwrite(target_name, preview_image)
+
 def preProcess(image_name):
     image = cv2.imread(image_name)
 
@@ -53,7 +62,8 @@ def preProcess(image_name):
         return cv2.matchTemplate(image, template, cv2.TM_CCOEFF_NORMED)
     
     # Process
-    processed = get_grayscale(image)
+    processed1 = get_grayscale(image)
+    processed2 = thresholding(processed1)
 
     # Overwrite the image
-    cv2.imwrite(image_name, processed)
+    cv2.imwrite(image_name, processed2)

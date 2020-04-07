@@ -1,26 +1,94 @@
-from tkinter import *
+import tkinter as Tk
 import pyscreenshot as ImageGrab
 import preProcess
-import cv2
+import ocr
+import pytesseract
+import time
+from PIL import Image
 
-master = Tk()
+image_path = '../screenshot.png'
+prev_image_path = '../prev.png'
 
-def callback():
-    # grab fullscreen
-    im = ImageGrab.grab()
+class MyApp(object):
+    """"""
+    #----------------------------------------------------------------------
+    def __init__(self, parent):
+        """Constructor"""
+        self.root = parent
+        self.root.title("Live Dictionary")
+        self.frame = Tk.Frame(parent)
+        self.frame.pack()
+                
+        captureBtn = Tk.Button(self.frame, text="Capture", command=self.capture)
+        captureBtn.pack()
 
-    # save image file
-    filename = "Screenshot.png"
-    im.save(filename)
+        ocrBtn = Tk.Button(self.frame, text="GO!", command=self.ocr)
+        ocrBtn.pack()
+        
+        self.image = Tk.Label(self.frame, text="Preview Image")
+        self.image.pack()
 
-    # show image in a window
-    # im.show()
+    #----------------------------------------------------------------------
+    def hide(self):
+        """"""
+        self.root.withdraw()
+        
+    #----------------------------------------------------------------------
+    def capture(self):
+        
+        self.hide()
 
-    # Send the image to preProcess.py for preprocessing and overwrite
-    preProcess.preProcess(filename)
+        # grab fullscreen
+        im = ImageGrab.grab()
 
+        # save image file
+        im.save(image_path)
 
-b = Button(master, text="OK", command=callback)
-b.pack()
+        # show image in a window
+        # im.show()
 
-mainloop()
+        try:
+            # Preprocess and overwrite
+            preProcess.preProcess(image_path)
+            
+            # Refresh Image
+            self.showPreviewImage()
+
+        except Exception as e:
+            print(e)
+        finally:
+            self.show()
+    
+    def showPreviewImage(self):
+        # Make a preview image
+        preProcess.createPreview(image_path, prev_image_path)
+        
+        # Load and show the preview Image
+        self.prevImage = Tk.PhotoImage(file=prev_image_path)
+        self.image.configure(image=self.prevImage, text="")
+        self.image.image = self.prevImage
+        self.image.pack()
+
+    def ocr(self):
+        
+        print(pytesseract.image_to_string(Image.open(image_path)))
+
+    #----------------------------------------------------------------------
+    def onCloseOtherFrame(self, otherFrame):
+        """"""
+        otherFrame.destroy()
+        self.show()
+        
+    #----------------------------------------------------------------------
+    def show(self):
+        """"""
+        self.root.update()
+        self.root.deiconify()
+        
+    
+#----------------------------------------------------------------------
+if __name__ == "__main__":
+    root = Tk.Tk()
+    root.geometry("800x600")
+    app = MyApp(root)
+    root.mainloop()
