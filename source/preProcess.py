@@ -6,7 +6,7 @@ def createPreview(image_name, target_name):
     image = cv2.imread(image_name)
 
     # Shrink it and create preview.png
-    preview_image = cv2.resize(image, dsize=(640, 480), fx=0.3, fy=0.7, interpolation=cv2.INTER_LINEAR)
+    preview_image = cv2.resize(image, dsize=(480, 320), fx=0.3, fy=0.7, interpolation=cv2.INTER_LINEAR)
     
     cv2.imwrite(target_name, preview_image)
 
